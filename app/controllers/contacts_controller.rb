@@ -1,32 +1,26 @@
-# controller for Contacts
-class ContactsController < ApplicationController
-  before_action :set_contact, only: [:show, :edit, :update, :destroy]
+# frozen_string_literal: true
 
-  # GET /contacts
-  # GET /contacts.json
+require 'contact_validator'
+class ContactsController < ApplicationController
+  before_action :set_contact, only: %i[show edit update destroy]
+
   def index
     @contacts = Contact.all
   end
 
-  # GET /contacts/1
-  # GET /contacts/1.json
   def show; end
 
-  # GET /contacts/new
   def new
     @contact = Contact.new
   end
 
-  # GET /contacts/1/edit
   def edit; end
 
-  # POST /contacts
-  # POST /contacts.json
   def create
     @contact = Contact.new(contact_params)
 
     respond_to do |format|
-      if @contact.save
+      if @contact.save && (validate_contact != nil)
         format.html { redirect_to @contact, notice: 'Contact was successfully created.' }
         format.json { render :show, status: :created, location: @contact }
       else
@@ -36,22 +30,22 @@ class ContactsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /contacts/1
-  # PATCH/PUT /contacts/1.json
   def update
     respond_to do |format|
-      if @contact.update(contact_params)
-        format.html { redirect_to @contact, notice: 'Contact was successfully updated.' }
+      if @contact.update(contact_params) && validate_contact
+        flash[:success] = 'Contact was successfully updated.'
+        format.html { redirect_to @contact }
         format.json { render :show, status: :ok, location: @contact }
       else
-        format.html { render :edit }
+        format.html do
+          @contact.errors[:base] << 'Invalid name. Please validate both first and last name.'
+          render :edit
+        end
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
     end
   end
 
-  # DELETE /contacts/1
-  # DELETE /contacts/1.json
   def destroy
     @contact.destroy
     respond_to do |format|
@@ -61,13 +55,16 @@ class ContactsController < ApplicationController
   end
 
   private
-  # Use callbacks to share common setup or constraints between actions.
+
   def set_contact
     @contact = Contact.find(params[:id])
   end
 
-  # Only allow a list of trusted parameters through.
   def contact_params
     params.require(:contact).permit(:first_name, :last_name, :email, :phone)
+  end
+
+  def validate_contact
+    ::ContactValidator.new(@contact).valid_name?
   end
 end

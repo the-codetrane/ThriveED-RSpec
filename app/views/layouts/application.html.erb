@@ -10,6 +10,11 @@
   </head>
 
   <body>
-    <%= yield %>
+  <% if flash.present? %>
+    <% flash.each do |type, msg| %>
+      <p id="<%= type %>"><%= msg %></p>
+    <% end %>
+  <% end  %>
+  <%= yield %>
   </body>
 </html>

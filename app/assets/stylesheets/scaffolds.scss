@@ -33,8 +33,14 @@ div.field,
 div.actions {
   margin-bottom: 10px; }
 
-#notice {
+#success {
   color: green; }
+
+#warning {
+  color: yellow; }
+
+#alert {
+  color: red; }
 
 .field_with_errors {
   padding: 2px;
